@@ -36,10 +36,18 @@ def export_folder(root_folder, output_folder, file_types, write_version, name_op
 
     for file in root_folder.dataFiles:
         if file.fileExtension == "f3d":
+            file_name = file.name.replace("/", "_")
+            tmp_name = output_folder + file_name + ' v' + str(file.latestVersionNumber) + '.step'
+            #export_name = dup_check(export_name)
+            if os.path.exists(tmp_name):
+                continue
+        
             open_doc(file)
             try:
-                output_name = get_name(write_version, name_option)
+                output_name = get_name(write_version, name_option).replace("/", "_")
                 export_active_doc(output_folder, file_types, output_name)
+                
+                ao.app.activeDocument.close(False)
 
             # TODO add handling
             except ValueError as e:
@@ -80,7 +88,9 @@ def export_active_doc(folder, file_types, output_name):
 
         if file_types.item(i).isSelected:
             export_name = folder + output_name + export_extensions[i]
-            export_name = dup_check(export_name)
+            #export_name = dup_check(export_name)
+            if os.path.exists(export_name):
+                return
             export_options = export_functions[i](export_name)
             export_mgr.execute(export_options)
 
@@ -91,7 +101,9 @@ def export_active_doc(folder, file_types, output_name):
 
         else:
             export_name = folder + output_name + '.f3d'
-            export_name = dup_check(export_name)
+            #export_name = dup_check(export_name)
+            if os.path.exists(export_name):
+                return
             export_options = export_mgr.createFusionArchiveExportOptions(export_name)
             export_mgr.execute(export_options)
 
@@ -155,13 +167,6 @@ class ExportCommand(apper.Fusion360CommandBase):
         output_folder = input_values['output_folder']
         folder_preserve = input_values['folder_preserve_id']
 
-        # TODO broken?????
-        file_types = inputs.itemById('file_types_input').listItems
-
-        write_version = input_values['write_version']
-        name_option = input_values['name_option_id']
-        root_folder = ao.app.data.activeProject.rootFolder
-
         # Make sure we have a folder not a file
         if not output_folder.endswith(os.path.sep):
             output_folder += os.path.sep
@@ -170,7 +175,24 @@ class ExportCommand(apper.Fusion360CommandBase):
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
 
-        export_folder(root_folder, output_folder, file_types, write_version, name_option, folder_preserve)
+        # TODO broken?????
+        file_types = inputs.itemById('file_types_input').listItems
+
+        write_version = input_values['write_version']
+        name_option = input_values['name_option_id']
+        
+        # export ALL projects, not just the currently open one
+        for project in ao.app.data.dataProjects:
+            root_folder = project.rootFolder
+            
+            new_folder = os.path.join(output_folder, project.name, "")
+
+            if os.path.exists(new_folder):
+                continue
+            else:
+                os.makedirs(new_folder)
+
+            export_folder(root_folder, new_folder, file_types, write_version, name_option, folder_preserve)
 
         if len(SKIPPED_FILES) > 0:
             ao.ui.messageBox(
