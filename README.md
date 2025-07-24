@@ -1,4 +1,4 @@
-# Project-Archiver
+# Fusion-Project-Archiver
 
 The archiver script will open all Fusion 360 3D data in all projects and export them as STEP, F3D, etc to a local location of your choosing.
 
@@ -20,7 +20,7 @@ It also skips projects if the export directory already exists, and I also change
 
 ### How to install<a name="How-to-install"></a>
 
-1. Click the latest link and download the [latest distribution](https://github.com/tapnair/Project-Archiver/blob/master/dist/Project-Archiver-2.0.1.zip)
+1. Click the latest link and download the [latest distribution](https://github.com/jasoncoon/Fusion-Project-Archiver/blob/master/dist/Fusion-Project-Archiver-2.0.2.zip)
 
 _Note you should download from the link above. The regular git downloads won't get the apper submodule_
 
